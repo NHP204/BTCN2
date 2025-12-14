@@ -1,12 +1,19 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Search, Home, Sun, Moon } from "lucide-react";
+import { Home, Sun, Moon } from "lucide-react";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setSearchTerm("");
+    }
+  }, [location.pathname]);
 
   const handleSearch = (e) => {
     e.preventDefault();

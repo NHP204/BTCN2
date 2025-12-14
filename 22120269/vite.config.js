@@ -11,4 +11,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // Thêm cấu hình proxy vào đây
+    proxy: {
+      "/api": {
+        target: "https://34.124.214.214:2423", // Server gốc
+        changeOrigin: true,
+        secure: false, // ⚠️ CỰC KỲ QUAN TRỌNG: Giúp bỏ qua lỗi SSL (ERR_CERT...) tự động
+      },
+    },
+  },
 });
