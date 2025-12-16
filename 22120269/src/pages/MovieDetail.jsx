@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { movieService } from "../services/api";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { movieService } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Star,
-  Calendar,
   Clock,
   ArrowLeft,
   Heart,
   Award,
   DollarSign,
   Video,
-  MessageSquare,
   User,
 } from "lucide-react";
 
 export default function MovieDetail() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -25,7 +27,20 @@ export default function MovieDetail() {
       try {
         setLoading(true);
         const data = await movieService.getDetails(id);
-        setMovie(data.data || data);
+        const movieData = data.data || data;
+        setMovie(movieData);
+        console.log("user222", user.user);
+
+        if (user) {
+          try {
+            const favResponse = await movieService.getFavorites();
+            const favList = favResponse.data || favResponse || [];
+            const isFav = favList.some((fav) => String(fav.id) === String(id));
+            setIsFavorite(isFav);
+          } catch (error) {
+            console.warn("Không thể tải trạng thái yêu thích:", error);
+          }
+        }
       } catch (error) {
         console.error("Error fetching detail:", error);
       } finally {
@@ -33,15 +48,34 @@ export default function MovieDetail() {
       }
     };
     fetchDetail();
-  }, [id]);
+  }, [id, user]);
 
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    alert(
-      !isFavorite
-        ? "Đã thêm vào danh sách yêu thích!"
-        : "Đã xóa khỏi danh sách yêu thích!"
-    );
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      if (
+        confirm(
+          "Bạn cần đăng nhập để sử dụng tính năng yêu thích. Đăng nhập ngay?"
+        )
+      ) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        await movieService.removeFavorite(id);
+        setIsFavorite(false);
+        alert("Đã xóa khỏi danh sách yêu thích!");
+      } else {
+        await movieService.addFavorite(id);
+        setIsFavorite(true);
+        alert("Đã thêm vào danh sách yêu thích!");
+      }
+    } catch (error) {
+      console.error("Lỗi khi thao tác yêu thích:", error);
+      alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+    }
   };
 
   if (loading)
@@ -87,6 +121,13 @@ export default function MovieDetail() {
       <div className="absolute inset-0 bg-linear-to-t from-white dark:from-gray-900 via-transparent to-transparent"></div>
 
       <div className="relative container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 mb-8 transition-colors font-medium"
+        >
+          <ArrowLeft size={20} /> Quay lại
+        </Link>
+
         <div className="flex flex-col md:flex-row gap-10 items-start mb-12">
           <div className="w-full md:w-1/3 shrink-0">
             <div className="rounded-xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
@@ -184,10 +225,10 @@ export default function MovieDetail() {
 
             <button
               onClick={handleToggleFavorite}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold border-2 transition-all ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold border-2 transition-all cursor-pointer ${
                 isFavorite
-                  ? "bg-red-600 border-red-600 text-white"
-                  : "border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/30"
+                  : "bg-transparent border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               }`}
             >
               <Heart size={20} fill={isFavorite ? "currentColor" : "none"} />{" "}
@@ -205,7 +246,7 @@ export default function MovieDetail() {
             <div className="flex gap-5 overflow-x-auto pb-6 scrollbar-hide snap-x">
               {actors.map((actor) => (
                 <Link
-                  to={`/persons/${actor.id}`}
+                  to={`/person/${actor.id}`}
                   key={actor.id}
                   className="min-w-35 w-35 snap-start group cursor-pointer"
                 >

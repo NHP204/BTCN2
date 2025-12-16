@@ -65,6 +65,43 @@ export const movieService = {
   getPersonDetail: (id) => fetchClient(`/persons/${id}`),
 
   getMovieCredits: (id) => fetchClient(`/movies/${id}/credits`),
+
+  login: (credentials) =>
+    fetchClient(`/users/login`, {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }),
+
+  register: (userData) =>
+    fetchClient(`/users/register`, {
+      method: "POST",
+      body: JSON.stringify(userData),
+    }),
+
+  logout: () =>
+    fetchClient(`/users/logout`, {
+      method: "POST",
+    }),
+
+  getProfile: () => fetchClient(`/users/profile`),
+
+  getFavorites: () => fetchClient(`/users/favorites`),
+
+  addFavorite: (movieId) =>
+    fetchClient(`/users/favorites/${movieId}`, {
+      method: "POST",
+    }),
+
+  removeFavorite: (movieId) =>
+    fetchClient(`/users/favorites/${movieId}`, {
+      method: "DELETE",
+    }),
+
+  updateProfile: (data) =>
+    fetchClient(`/users/profile`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };
 
 export default movieService;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { movieService } from "../services/api";
+import { movieService } from "@/services/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import MovieCard from "../components/movie/MovieCard";
+import MovieCard from "@/components/movie/MovieCard";
 
 export default function Home() {
   const [bannerMovies, setBannerMovies] = useState([]);

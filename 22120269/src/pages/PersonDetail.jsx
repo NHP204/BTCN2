@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { movieService } from "../services/api";
-import { ArrowLeft, Calendar, Activity, UserMinus } from "lucide-react";
+import { Calendar, Activity, UserMinus } from "lucide-react";
 import MovieCard from "../components/movie/MovieCard";
 
 export default function PersonDetail() {
